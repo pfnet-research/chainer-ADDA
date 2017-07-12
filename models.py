@@ -13,11 +13,12 @@ class Encoder(chainer.Chain):
 		self.dropout = dropout
 		super().__init__(
 				cnn=L.Convolution2D(None, 64, 3), #L.VGG16Layers(),
-				l1=L.Linear(None, h))
+				l1=L.Linear(None, h)
+				)
 
-	def __call__(self, x, train=True):
-		encoding = F.dropout(F.relu(self.cnn(x)), train=train, ratio=self.dropout) #, layers=["pool5"])["pool5"]
-		encoding = F.dropout(F.relu(self.l1(encoding)), train=train, ratio=self.dropout)
+	def __call__(self, x):
+		encoding = F.dropout(F.relu(self.cnn(x)), ratio=self.dropout) #, layers=["pool5"])["pool5"]
+		encoding = F.dropout(F.relu(self.l1(encoding)), ratio=self.dropout)
 		return encoding
 
 class Discriminator(chainer.Chain):
@@ -49,7 +50,6 @@ class Loss(chainer.Chain):
 				classifier=Classifier(num_classes))
 
 	def __call__(self, x, t):
-
 		#vis_image(x.data[1]*255.)
 		#plt.show()
 		encode = self.encoder(x)
