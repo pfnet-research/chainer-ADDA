@@ -5,6 +5,7 @@ import copy
 
 import chainer
 from chainer import optimizers, serializers
+from chainer.functions.evaluation import accuracy
 from chainer.training import extensions
 from chainer.datasets import tuple_dataset
 from chainercv.datasets import TransformDataset
@@ -26,7 +27,7 @@ def data2iterator(data, batchsize, multiprocess=False):
     return train_iterator, test_iterator
 
 
-def pretrain_source_cnn(data, args, epochs=100):
+def pretrain_source_cnn(data, args, epochs=1000):
     print(":: pretraining source encoder")
     source_cnn = Loss(num_classes=10)
     if args.device >= 0:
@@ -60,7 +61,30 @@ def pretrain_source_cnn(data, args, epochs=100):
     return source_cnn
 
 
-def train_target_cnn(source, target, source_cnn, target_cnn, args, epochs=1000):
+def test_pretrained_on_target(source_cnn, target, args):
+    print(":: testing pretrained source CNN on target domain")
+
+    if args.device >= 0:
+        source_cnn.to_gpu()
+
+    with chainer.using_config('train', False):
+        _, target_test_iterator = data2iterator(target, args.batchsize, multiprocess=False)
+
+        mean_accuracy = 0.0
+        n_batches = 0
+        
+        for batch in target_test_iterator:
+            batch, labels = chainer.dataset.concat_examples(batch, device=args.device)
+            encode = source_cnn.encoder(batch)
+            classify = source_cnn.classifier(encode)
+            acc = accuracy.accuracy(classify, labels)
+            mean_accuracy += acc.data
+            n_batches += 1
+        mean_accuracy /= n_batches
+    
+        print(":: classifier trained on only source, evaluated on target: accuracy {}%".format(mean_accuracy))
+
+def train_target_cnn(source, target, source_cnn, target_cnn, args, epochs=10000):
     print(":: training encoder with target domain")
     discriminator = Discriminator()
 
@@ -126,6 +150,9 @@ def main(args):
         source_cnn = Loss(num_classes=10)
         serializers.load_npz(pretrained, source_cnn)
 
+    # how well does this perform on target domain?
+    test_pretrained_on_target(source_cnn, target, args)
+    exit()
     # copy this for the target
     target_cnn = source_cnn.copy()
 
@@ -135,12 +162,12 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--device", "-g", type=int, default=-1)
-    parser.add_argument("--batchsize", "-b", type=int, default=32)
+    parser.add_argument("--batchsize", "-b", type=int, default=256)
     parser.add_argument("--lr", "-lr", type=float, default=1.0E-4)
     parser.add_argument("--weight_decay", "-w", type=float, default=2.0E-5)
     parser.add_argument("--output", "-o", type=str, default="result")
     parser.add_argument("--pretrained_source", type=str,
-                        default="source_model_epoch_100")
+                        default="source_model_epoch_1000")
     args = parser.parse_args()
 
     if args.device >= 0:

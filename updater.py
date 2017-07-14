@@ -46,7 +46,7 @@ class ADDAUpdater(training.StandardUpdater):
         D_target = self.discriminator(target_encoding)
 
         # discriminator loss
-        D_loss = -F.sum(F.log_softmax(D_source)[:, 0]) / self.args.batchsize \
+        D_loss = - F.sum(F.log_softmax(D_source)[:, 0]) / self.args.batchsize \
                  - F.sum(F.log_softmax(D_target)[:, 1]) / self.args.batchsize
 
         # update discriminator

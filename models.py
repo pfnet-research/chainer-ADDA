@@ -18,7 +18,7 @@ class Encoder(chainer.Chain):
     def __call__(self, x):
         h = F.max_pooling_2d(F.relu(self.conv1(x)), 2, 2)
         h = F.max_pooling_2d(F.relu(self.conv2(h)), 2, 2)
-        h = F.relu(self.conv3(h))
+        h = F.dropout(F.relu(self.conv3(h)), ratio=self.dropout)
         h = F.dropout(F.relu(self.fc4(h)), ratio=self.dropout)
         return h
 
@@ -40,7 +40,8 @@ class Discriminator(chainer.Chain):
 
 class Classifier(chainer.Chain):
     
-    def __init__(self, num_classes):
+    def __init__(self, num_classes, dropout=0.5):
+        self.dropout = dropout
         super().__init__(
                 l1=L.Linear(None, num_classes))
 
