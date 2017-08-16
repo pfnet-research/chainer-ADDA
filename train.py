@@ -55,7 +55,7 @@ def pretrain_source_cnn(data, args, epochs=1000):
     trainer.extend(extensions.PrintReport(
         ['epoch', 'main/loss', 'validation/main/loss',
          'main/accuracy', 'validation/main/accuracy', 'elapsed_time']))
-    
+
     trainer.run()
 
     return source_cnn
@@ -72,7 +72,7 @@ def test_pretrained_on_target(source_cnn, target, args):
 
         mean_accuracy = 0.0
         n_batches = 0
-        
+
         for batch in target_test_iterator:
             batch, labels = chainer.dataset.concat_examples(batch, device=args.device)
             encode = source_cnn.encoder(batch)
@@ -81,7 +81,7 @@ def test_pretrained_on_target(source_cnn, target, args):
             mean_accuracy += acc.data
             n_batches += 1
         mean_accuracy /= n_batches
-    
+
         print(":: classifier trained on only source, evaluated on target: accuracy {}%".format(mean_accuracy))
 
 def train_target_cnn(source, target, source_cnn, target_cnn, args, epochs=10000):
@@ -153,8 +153,10 @@ def main(args):
     # how well does this perform on target domain?
     test_pretrained_on_target(source_cnn, target, args)
     exit()
-    # copy this for the target
-    target_cnn = source_cnn.copy()
+    # initialize the target cnn (do not use source_cnn.copy)
+    target_cnn = Loss(num_classes=10)
+    # copy parameters from source cnn to target cnn
+    target_cnn.copyparams(source_cnn)
 
     train_target_cnn(source, target, source_cnn, target_cnn, args)
 
