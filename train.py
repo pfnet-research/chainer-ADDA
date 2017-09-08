@@ -152,7 +152,7 @@ def main(args):
 
     # how well does this perform on target domain?
     test_pretrained_on_target(source_cnn, target, args)
-    exit()
+
     # initialize the target cnn (do not use source_cnn.copy)
     target_cnn = Loss(num_classes=10)
     # copy parameters from source cnn to target cnn
