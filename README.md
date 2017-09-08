@@ -1,8 +1,6 @@
 # chainer-ADDA
-Adversarial Discriminative Domain Adaptation in Chainer (WIP).
-Able to train adversarially, but not thoroughly checked and validated; stay tuned...
-
-**Note:** this code depends on some Chainer pull requests (and one bit of uncommited code...). **It won't run out of the box. I will fix this ASAP.**
+Implementation of [Adversarial Discriminative Domain Adaptation](https://arxiv.org/abs/1702.05464) in [Chainer](https://github.com/chainer/chainer).
+**Note: this code depends on the master branch of Chainer**
 
 ## Results
 The following results are for the SVHN to MNIST domain adaptation task.
@@ -14,7 +12,7 @@ The following results are for the SVHN to MNIST domain adaptation task.
 | ADDA          | 0.760 | 0.800          |
 
 ## Usage
-Run `python train.py -g 0` to train everything. SVHN and MNIST datasets will download automatically. If a classifier pretrained on the source (SVHN) domain is not found, one will be trained first, then continue on to do ADDA.
+Run `python train.py -g 0` to train everything using GPU 0. SVHN and MNIST datasets will download automatically. If a classifier pretrained on the source (SVHN) domain is not found, one will be trained first, then continue on to do ADDA.
 
 
 # Resources

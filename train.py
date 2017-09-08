@@ -128,7 +128,7 @@ def train_target_cnn(source, target, source_cnn, target_cnn, args, epochs=10000)
 def main(args):
     # get datasets
     source_train, source_test = chainer.datasets.get_svhn()
-    target_train, target_test = chainer.datasets.get_mnist(ndim=3, pad_channels=True)
+    target_train, target_test = chainer.datasets.get_mnist(ndim=3, rgb_format=True)
     source = source_train, source_test
 
     # resize mnist to 32x32
