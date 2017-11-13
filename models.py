@@ -6,14 +6,19 @@ from chainer import reporter
 
 
 class Encoder(chainer.Chain):
-    
+
     def __init__(self, h=256, dropout=0.5):
+        super(Net, self).__init__()
         self.dropout = dropout
-        super().__init__(
-                conv1 = L.Convolution2D(3, 8, ksize=5, stride=1),
-                conv2 = L.Convolution2D(8, 16, ksize=5, stride=1),
-                conv3 = L.Convolution2D(16, 120, ksize=4, stride=1),
-                fc4 = L.Linear(None, 500))
+        initialW = chainer.initializers.HeNormal()
+        with self.init_scope():
+            self.conv1 = L.Convolution2D(3, 8, ksize=5, stride=1,
+                                         initialW=initialW)
+            self.conv2 = L.Convolution2D(8, 16, ksize=5, stride=1,
+                                         initialW=initialW)
+            self.conv3 = L.Convolution2D(16, 120, ksize=4, stride=1,
+                                         initialW=initialW)
+            self.fc4 = L.Linear(None, 500)
 
     def __call__(self, x):
         h = F.max_pooling_2d(F.relu(self.conv1(x)), 2, 2)
@@ -39,7 +44,7 @@ class Discriminator(chainer.Chain):
 
 
 class Classifier(chainer.Chain):
-    
+
     def __init__(self, num_classes, dropout=0.5):
         self.dropout = dropout
         super().__init__(
@@ -60,7 +65,7 @@ class Loss(chainer.Chain):
     def __call__(self, x, t):
         encode = self.encoder(x)
         classify = self.classifier(encode)
-        
+
         self.accuracy = accuracy.accuracy(classify, t)
         self.loss = F.softmax_cross_entropy(classify, t)
 
