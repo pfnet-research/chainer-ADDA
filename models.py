@@ -18,7 +18,7 @@ class Encoder(chainer.Chain):
                                          initialW=initialW)
             self.conv3 = L.Convolution2D(16, 120, ksize=4, stride=1,
                                          initialW=initialW)
-            self.fc4 = L.Linear(None, 500)
+            self.fc4 = L.Linear(None, 500, initialW=initialW)
 
     def __call__(self, x):
         h = F.max_pooling_2d(F.relu(self.conv1(x)), 2, 2)
@@ -31,6 +31,7 @@ class Encoder(chainer.Chain):
 class Discriminator(chainer.Chain):
 
     def __init__(self, h=500):
+        super(Net, self).__init__()
         super().__init__(
                 l1=L.Linear(None, h),
                 l2=L.Linear(h, h),
