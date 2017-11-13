@@ -8,7 +8,7 @@ from chainer import reporter
 class Encoder(chainer.Chain):
 
     def __init__(self, h=256, dropout=0.5):
-        super(Net, self).__init__()
+        super(Encoder, self).__init__()
         self.dropout = dropout
         initialW = chainer.initializers.HeNormal()
         with self.init_scope():
@@ -31,11 +31,12 @@ class Encoder(chainer.Chain):
 class Discriminator(chainer.Chain):
 
     def __init__(self, h=500):
-        super(Net, self).__init__()
-        super().__init__(
-                l1=L.Linear(None, h),
-                l2=L.Linear(h, h),
-                l3=L.Linear(h, 2))
+        super(Discriminator, self).__init__()
+        initialW = chainer.initializers.HeNormal()
+        with self.init_scope():
+            self.l1 = L.Linear(None, h, initialW=initialW)
+            self.l2 = L.Linear(h, h, initialW=initialW)
+            self.l3 = L.Linear(h, 2, initialW=initialW)
 
     def __call__(self, x):
         l1 = F.leaky_relu(self.l1(x))
@@ -47,9 +48,11 @@ class Discriminator(chainer.Chain):
 class Classifier(chainer.Chain):
 
     def __init__(self, num_classes, dropout=0.5):
+        super(Classifier, self).__init__()
+        initialW = chainer.initializers.HeNormal()
         self.dropout = dropout
-        super().__init__(
-                l1=L.Linear(None, num_classes))
+        with self.init_scope():
+            self.l1 = L.Linear(None, num_classes, initialW=initialW)
 
     def __call__(self, x):
         prediction = self.l1(x)
@@ -59,9 +62,11 @@ class Classifier(chainer.Chain):
 class Loss(chainer.Chain):
 
     def __init__(self, num_classes):
-        super().__init__(
-                encoder=Encoder(),
-                classifier=Classifier(num_classes))
+        super(Loss, self).__init__()
+        initialW = chainer.initializers.HeNormal()
+        with self.init_scope():
+            self.encoder = Encoder()
+            self.classifier = Classifier(num_classes)
 
     def __call__(self, x, t):
         encode = self.encoder(x)
